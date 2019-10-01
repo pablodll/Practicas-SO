@@ -23,12 +23,15 @@ copynFile(FILE * origin, FILE * destination, int nBytes)
 	c = fgetc(origin);
 	
 	while(i < nBytes && c != EOF){
-	
 	   if(fputc(c, destination) == EOF){
 	      return -1;
 	   }
 	   c = fgetc(origin);
 	   i++;
+	}
+
+	if(c == EOF) {
+	   fputc(c, destination);
 	}
 	
 	return i;
