@@ -6,6 +6,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#include <time.h>
 
 int main(){
    
@@ -39,12 +40,13 @@ int main(){
             printf( (st.st_mode & S_IROTH) ? "r" : "-");
             printf( (st.st_mode & S_IWOTH) ? "w" : "-");
             printf( (st.st_mode & S_IXOTH) ? "x" : "-");
-            printf(" %lu ", st.st_nlink);
-            printf("%u ", st.st_uid);
-            printf("%u ", st.st_gid);
-            printf("%lu ", st.st_size);
-            printf("%lu ", st.st_ino);
-            printf("%s\n", dp->d_name);
+            printf(" NLinks: %lu ", st.st_nlink);
+            printf("User: %u ", st.st_uid);
+            printf("Group: %u ", st.st_gid);
+            printf("Tam: %lu ", st.st_size);
+            printf("i-node: %lu ", st.st_ino);
+            printf("%s ", dp->d_name);
+            printf("%s", ctime(&st.st_mtime));
          }
       }
    }
