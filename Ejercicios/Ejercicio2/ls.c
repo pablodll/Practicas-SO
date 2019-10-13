@@ -1,3 +1,4 @@
+//Autor: Pablo Daurell Marina
 #include <stdio.h>
 #include <unistd.h>
 #include <stdlib.h>
@@ -8,24 +9,32 @@
 #include <unistd.h>
 #include <time.h>
 
-int main(){
+int main(int argc, char *argv[]){
    
    DIR *dir;
    struct dirent *dp;
    struct stat st;
    char buf[PATH_MAX];
-
-   if(getcwd(buf, PATH_MAX) == NULL){
-      return -1;
-   }
    
-   dir = opendir(buf);
+   if(argc == 1){
+      if(getcwd(buf, PATH_MAX) == NULL){
+         return -1;
+      }
+      dir = opendir(buf);
+      printf("%s\n", buf);
+   }
+   else{
+      dir = opendir(argv[1]);
+      chdir(argv[1]);
+   }
    
    if(dir == NULL){
       fprintf(stderr, "Error al abrir %s\n", buf);
    }
    else{
+      
       while((dp = readdir(dir)) != NULL){
+      
          if(stat(dp->d_name, &st) == -1){
             fprintf(stderr, "Error in %s\n", dp->d_name);
          }
