@@ -16,14 +16,14 @@ int main(int argc, char *argv[]){
    struct stat st;
    char buf[PATH_MAX];
    
-   if(argc == 1){
+   if(argc == 1){ // Directorio actual
       if(getcwd(buf, PATH_MAX) == NULL){
          return -1;
       }
       dir = opendir(buf);
       printf("%s\n", buf);
    }
-   else{
+   else{ // Directorio externo
       dir = opendir(argv[1]);
       chdir(argv[1]);
    }
