@@ -1,3 +1,4 @@
+# Practica 2 SO
 # Ela Shepherd Arevalo
 # Pablo Daurell Marina
 
