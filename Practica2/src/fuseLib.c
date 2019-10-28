@@ -475,6 +475,49 @@ static int my_truncate(const char *path, off_t size)
 }
 
 /**
+ * @brief Reads data from a file
+ *
+ * @param path file path
+ * @param buf buffer to store the data we read
+ * @param size quantity of bytes to read
+ * @param offset offset over the reading
+ * @param fi FUSE structure linked to the opened file 
+ * @return >=0 on success and <0 on error
+**/
+static int my_read (const char *path, char *buf, size_t size, off_t offset, struct 
+fuse_file_info *fi)
+{
+   char buffer[BLOCK_SIZE_BYTES];
+   int bytes2Read = size, totalRead = 0;
+   NodeStruct *node = myFileSystem.nodes[fi->fh];
+   
+   fprintf(stderr, "--->>>my_read: path %s\n", path);
+   
+   // Read data
+   while(bytes2Read) {
+      int i;
+      int currentBlock, offBlock;
+      currentBlock = node->blocks[offset / BLOCK_SIZE_BYTES];
+      offBlock = offset % BLOCK_SIZE_BYTES;
+      
+      if(readBlock(&myFileSystem, currentBlock, &buffer) == -1) {
+         fprintf(stderr, "Error reading blocks in my_read\n");
+         return -EIO;
+      }
+      
+      for(i = offBlock; (i < BLOCK_SIZE_BYTES) && (totalRead < size); i++){
+         buf[totalRead++] = buffer[i];
+      }
+      
+      // Discount the read stuff
+      bytes2Read -= (i - offBlock);
+      offset += (i - offBlock);
+   }
+   
+   return totalRead;
+}
+
+/**
  * @brief Removes a file
  *
  * @param path file path
@@ -527,5 +570,6 @@ struct fuse_operations myFS_operations = {
     .release	= my_release,					// Close an opened file
     .mknod		= my_mknod,						// Create a new file
     .unlink    = my_unlink,               // Removes a file
+    .read      = my_read,                 // Reads data from a file
 };
 
