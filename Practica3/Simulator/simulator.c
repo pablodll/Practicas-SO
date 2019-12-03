@@ -21,10 +21,10 @@ int esperando_parada[N_PARADAS] //= {0,0,0,0,0};
 int esperando_bajar[N_PARADAS] //= {0,0,0,0,0};
 
 // Otras definiciones globales (comunicacion y sincronizacion)
-pthread_mutex_t esperar_parada;
 pthread_mutex_t esperar_bajada;
-sem_t sem_paradaLlena[N_PARADAS];
-sem_t sem_busEnParada[N_PARADAS];
+pthread_mutex_t parada[N_PARADAS];
+pthread_cond_t enRuta;
+//pthread_mutex_t busEnParada[N_PARADAS];
 
 void * thread_autobus(void * args) {
 	while (1) {
@@ -93,9 +93,11 @@ void Autobus_En_Parada(){
 	/*	Ajustar el estado y bloquear al autobus hasta que no haya pasajeros que
 		quieran bajar y/o subir la parada actual. Despues se pone en marcha */
 	estado = EN_PARADA;
+	
 	while(esperando_parada[parada_actual]){
-		signal();
+		
 	}
+	
 	estado = EN_RUTA;
 }
 
@@ -109,15 +111,16 @@ void Subir_Autobus(int id_usuario, int origen){
 	/* El usuario indicara que quiere subir en la parada ’origen’, esperara a que
 		el autobus se pare en dicha parada y subira. El id_usuario puede utilizarse para
 		proporcionar informacion de depuracion */
-	pthread_mutex_lock(&esperar_parada);
+	pthread_mutex_lock(&parada[origen]);
 	esperando_parada[origen]++;
-	pthread_mutex_unlock(&esperar_parada);
+	pthread_mutex_unlock(&parada[origen]);
 	
 	//wait
-	if(estado == EN_RUTA){
-		sem_post(&sem_paradaLlena[origen]);
-		sem_wait(&sem);
+	pthread_mutex_lock(&parada[origen]);
+	while(estado == EN_RUTA){
+		pthread_cond_wait(&enRuta, &parada[origen]);
 	}
+	pthread_mutex_unlock(&parada[origen]);
 
 	pthread_mutex_lock(&esperar_parada);
 	esperando_parada[origen]--;
